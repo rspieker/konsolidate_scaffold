@@ -1,7 +1,7 @@
 konsolidate_scaffold
 ====================
 
-Scaffolding tier for Konsolidate
+Scaffolding tier for Konsolidate (https://github.com/konfirm/konsolidate)
 
 
 
