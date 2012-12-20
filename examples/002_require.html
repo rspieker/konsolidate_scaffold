@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>{title:this is the default title}</title>
+
+		<!--- require jQuery  -->
+		<k:require file="http://code.jquery.com/jquery.min.js" />
+
+		<!--- require foundation stylesheet  -->
+		<k:require file="http://cdn.jsdelivr.net/foundation/3.2.2/stylesheets/foundation.min.css" />
+
+		<k:style /><!--- here will be the collected stylesheet requirements  -->
+	</head>
+	<body>
+		<div id="capture">
+			<h1>{title:Yet another default title}</h1>
+			<p>
+				{hello:Hello world!}
+			</p>
+		</div>
+
+		<k:script /><!--- here will be the collected script requirements  -->
+	</body>
+</html>
