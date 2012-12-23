@@ -8,7 +8,8 @@ This is maily due to the use of DOM documents combined with the more powerful op
 > Especially when benchmarking the repeating 'block' is (in comparison) painstakingly slow (Scaffold template is roughly 35 times slower (60 times when using the cache in the old template engine).
 
 > In a more real world usage test the results are way better but still Scaffold template is ~5 times slower.
-> We do believe however that the Scaffold template uses much cleaner templates and will be able to improve the development flow, and we are actually talking about milliseconds here (ScaffoldTemplate 0.0417 seconds vs CoreTemplate 0.0089 seconds, which is 4.7 times slower). While I will continue to optimize the performance, I strongly believe that ScaffoldTemplate already has several benefits; e.g. security (mostly output escaping), automatic resolvement of external requirements (only the requirements actually used are in the output) and most of all, your front-enders don't need to learn PHP basics.
+> We do believe however that the Scaffold template uses much cleaner templates and will be able to improve the development flow, and we are actually talking about milliseconds here (ScaffoldTemplate 0.0417 seconds vs CoreTemplate 0.0089 seconds, which is 4.7 times slower). While I will continue to optimize the performance, I strongly believe that ScaffoldTemplate already has several benefits; e.g. security (mostly output escaping), automatic resolvement of external requirements (only the requirements actually used are in the output) and your front-enders don't need to learn PHP basics.
+> Last but most certainly not least, the hooks that allow you to do advanced pre-/postprocessing directly on the DOM allow for way more flexibility than CoreTemplate (even though similar functionality could be achieved with CoreTemplate  using output buffering).
 
 
 ##Basic usage
