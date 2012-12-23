@@ -66,31 +66,34 @@ class ScaffoldSource extends Konsolidate
 	 */
 	public function combine($fileList)
 	{
-		$alphabet = array_map('chr', array_merge(
-			range(48, 57),  //  numbers
-			range(97, 122), //  lower case characters
-			range(65, 90)   //  upper case characters
-		));
-		$checksum  = explode(PHP_EOL, wordwrap(md5(json_encode($fileList)), 2, PHP_EOL, true));
-		$cacheFile = '';
-		while (count($checksum))
-			$cacheFile .= $alphabet[hexdec(array_shift($checksum)) % count($alphabet)];
-		$cacheFile = $this->_cachePath . '/' . $cacheFile . '.' . pathinfo($fileList[0], PATHINFO_EXTENSION);
-
-		if (realpath($cacheFile))
-			return basename($cacheFile);
-
-		$fp = fopen($cacheFile, 'w+');
-		if ($fp)
+		if (count($fileList) > 0)
 		{
-			foreach ($fileList as $file)
+			$alphabet = array_map('chr', array_merge(
+				range(48, 57),  //  numbers
+				range(97, 122), //  lower case characters
+				range(65, 90)   //  upper case characters
+			));
+			$checksum  = explode(PHP_EOL, wordwrap(md5(json_encode($fileList)), 2, PHP_EOL, true));
+			$cacheFile = '';
+			while (count($checksum))
+				$cacheFile .= $alphabet[hexdec(array_shift($checksum)) % count($alphabet)];
+			$cacheFile = $this->_cachePath . '/' . $cacheFile . '.' . pathinfo($fileList[0], PATHINFO_EXTENSION);
+
+			if (realpath($cacheFile))
+				return basename($cacheFile);
+
+			$fp = fopen($cacheFile, 'w+');
+			if ($fp)
 			{
-				$source = trim(file_get_contents($file)) . PHP_EOL;
-				if (substr($file, 0, strlen($this->_cachePath)) == $this->_cachePath)
-					$source = '/* ' . basename($file) . ' */' . PHP_EOL . $source;
-				fputs($fp, $source);
+				foreach ($fileList as $file)
+				{
+					$source = trim(file_get_contents($file)) . PHP_EOL;
+					if (substr($file, 0, strlen($this->_cachePath)) == $this->_cachePath)
+						$source = '/* ' . basename($file) . ' */' . PHP_EOL . $source;
+					fputs($fp, $source);
+				}
+				return basename($cacheFile);
 			}
-			return basename($cacheFile);
 		}
 		return false;
 	}
