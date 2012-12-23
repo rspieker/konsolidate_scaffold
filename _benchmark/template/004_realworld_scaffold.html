@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html lang="{lang:en}">
+	<head>
+		<meta charset="utf-8" />
+		<title>{title:Untitled}</title>
+
+		<k:require file="/path/to/stylesheet1.css" />
+		<k:require file="/path/to/stylesheet2.css" />
+		<k:require file="/path/to/stylesheet3.css" />
+		<k:require file="/path/to/stylesheet4.css" />
+
+		<k:require file="/path/to/javascript1.js" />
+		<k:require file="/path/to/javascript2.js" />
+		<k:require file="/path/to/javascript3.js" />
+		<k:require file="/path/to/javascript4.js" />
+		<k:require file="/path/to/javascript5.js" />
+
+		<k:style />
+	</head>
+	<body>
+		<div id="capture">
+			<k:include file="template/004_realworld_menu_scaffold.html" />
+			<div class="content">
+				<k:block name="article">
+					<k:include file="template/004_realworld_article_scaffold.html" />
+				</k:block>
+			</div>
+		</div>
+		<k:script />
+	</body>
+</html>

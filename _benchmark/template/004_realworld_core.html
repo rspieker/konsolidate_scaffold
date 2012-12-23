@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html lang="<?= (isset($lang) ? $lang : 'en') ?>">
+	<head>
+		<meta charset="utf-8" />
+		<title><?= (isset($title) ? $title : 'Untitled') ?></title>
+		<?
+			if (isset($style))
+				foreach ($style as $file)
+					include('004_realworld_style_core.html');
+		?>
+	</head>
+	<body>
+		<div id="capture">
+			<? include('004_realworld_menu_core.html') ?>
+			<div class="content">
+				<?
+					$index = 0;
+					foreach ($article as $title=>$content)
+					{
+						include('004_realworld_article_core.html');
+						++$index;
+					}
+				?>
+			</div>
+		</div>
+		<?
+			if (isset($script))
+				foreach ($script as $file)
+					include('004_realworld_script_core.html');
+		?>
+	</body>
+</html>
