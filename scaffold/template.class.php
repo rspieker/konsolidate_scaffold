@@ -26,7 +26,9 @@ class ScaffoldTemplate extends Konsolidate
 	protected $_replace;
 	protected $_child;
 	protected $_hook;
+	protected $_filters;
 
+	public $_featureExists;
 
 	/**
 	 *  Constructor
@@ -47,6 +49,18 @@ class ScaffoldTemplate extends Konsolidate
 		$this->_namespace      = $this->_getNamespace();
 		$this->_feature        = Array();
 		$this->_child          = Array();
+		$this->_featureExists  = Array();
+
+		$filters = $this->get('/Config/Template/filters', 'comment, whitespace');
+		//  if filters are set (read: not explicitly turned off) and this template instance has no parent template, hook the filters to the PHASE_RENDER phase
+		if (!empty($filters) && !$parentTemplate)
+		{
+			$this->_filters = preg_split('/\s*,\s*/', $filters);
+			$this->addHook(self::PHASE_RENDER, Array($this, '_applyFilters'));
+		}
+
+		if ($parentTemplate)
+			$this->_featureExists = &$parentTemplate->_featureExists;
 
 		if (!empty($source))
 			$this->load($source, $parentTemplate, $prepare);
@@ -439,13 +453,17 @@ class ScaffoldTemplate extends Konsolidate
 	 */
 	protected function _instanceFeature($node)
 	{
-		if (!isset($this->_feature[$node->localName]))
-			$this->_feature[$node->localName] = Array();
+		$localName = $node->localName;
+		if (!isset($this->_feature[$localName]))
+			$this->_feature[$localName] = Array();
 
 		if (!$this->_featureIsProcessed($node))
 		{
-			$type     = 'Feature/' . $node->localName;
-			$instance = $this->instance($this->checkModuleAvailability($type) ? $type : dirname($type), $node, $this);
+			if (!isset($this->_featureExists[$localName]))
+				$this->_featureExists[$localName] = $this->checkModuleAvailability('Feature/' . $localName);
+
+			$type     = $this->_featureExists[$node->localName] ? 'Feature/' . $localName : 'Feature';
+			$instance = $this->instance($type, $node, $this);
 			$instance->prepare();
 			$this->_feature[$node->localName][] = $instance;
 
@@ -569,12 +587,12 @@ class ScaffoldTemplate extends Konsolidate
 
 
 	/**
-	 *  _getFileName
+	 *  Try to determine if given source may be a file and if so, see whether it exists
 	 *  @name   _getFileName
 	 *  @type   method
 	 *  @access protected
-	 *  @param  $source
-	 *  @return
+	 *  @param  string source
+	 *  @return string filename (false on error)
 	 */
 	protected function _getFileName($source)
 	{
@@ -592,12 +610,11 @@ class ScaffoldTemplate extends Konsolidate
 	}
 
 	/**
-	 *  _getNamespace
+	 *  Obtain the namespaces which should be used for features
 	 *  @name   _getNamespace
 	 *  @type   method
 	 *  @access protected
-	 *  @param
-	 *  @return
+	 *  @return array namespaces
 	 */
 	protected function _getNamespace()
 	{
@@ -606,13 +623,31 @@ class ScaffoldTemplate extends Konsolidate
 		return $namespace;
 	}
 
+	/**
+	 *  Magic setter to trigger PHASE_ASSIGN phase hooks and setting the value
+	 *  @name   __set
+	 *  @type   method
+	 *  @access public
+	 *  @return void
+	 */
 	public function __set($property, $value)
 	{
 		$this->_enterPhase(self::PHASE_ASSIGN, Array('property'=>&$property, 'value'=>&$value));
 		parent::__set($property, $value);
 	}
-}
-alue'=>&$value));
-		parent::__set($property, $value);
+
+	/**
+	 *  Apply the configured filters
+	 *  @name   _applyFilters
+	 *  @type   method
+	 *  @access protected
+	 *  @param  stdClass hook
+	 *  @return void
+	 */
+	protected function _applyFilters($hook)
+	{
+		if (!$this->_template)
+			foreach ($this->_filters as $method)
+				$hook->template->call('Filter/' . $method, $hook->dom);
 	}
 }
