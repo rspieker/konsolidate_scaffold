@@ -247,11 +247,25 @@ class ScaffoldTemplate extends Konsolidate
 		$this->_enterPhase(self::PHASE_PRE_RENDER);
 		$this->_render();
 
+		//  create a reference to the inner DOMDocument
+		$dom = $this->_content;
+
 		//  restore the natural balance of the DOMDocument, as we (may) have wrecked havoc by splitting textnodes and manipulating removing feature nodes
-		$this->_content->normalizeDocument();
+		$dom->normalizeDocument();
 		$this->_enterPhase(self::PHASE_RENDER);
 
-		return $asDOM ? $this->_content : $this->_content->saveHTML();
+		//  This works arounds PHP bug #40359 (https://bugs.php.net/bug.php?id=40359) where the saveHTML method will actually meddle with the whitespace in the output, so we create the HTML output ourselves
+		if (LIBXML_VERSION > 20632)
+		{
+			$selfClosing = Array('base', 'basefont', 'frame', 'link', 'meta', 'area', 'br', 'col', 'hr', 'img', 'input', 'param');
+			//  find all nodes which do not contain any comment, text, CDATA or element node
+			foreach ($this->_xpath->query('//*[not(node())]') as $node)
+				if (!in_array(strToLower($node->nodeName), $selfClosing))
+					$node->appendChild($this->_content->createTextNode(''));
+
+			return $asDOM ? $dom : $dom->saveXML($dom->doctype) . PHP_EOL . PHP_EOL . $dom->saveXML($dom->documentElement);
+		}
+		return $asDOM ? $dom : $dom->saveHTML();
 	}
 
 	/**
@@ -630,19 +644,6 @@ class ScaffoldTemplate extends Konsolidate
 	/**
 	 *  Apply the configured filters
 	 *  @name   _applyFilters
-	 *  @type   method
-	 *  @access protected
-	 *  @param  stdClass hook
-	 *  @return void
-	 */
-	protected function _applyFilters($hook)
-	{
-		if (!$this->_template)
-			foreach ($this->_filters as $method)
-				$hook->template->call('Filter/' . $method, $hook->dom);
-	}
-}
-pplyFilters
 	 *  @type   method
 	 *  @access protected
 	 *  @param  stdClass hook
