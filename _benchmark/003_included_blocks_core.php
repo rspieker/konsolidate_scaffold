@@ -6,6 +6,7 @@ $block = Array();
 for ($i = 97; $i <= 122; ++$i)
 	$block[chr($i)] = 'This is ' . chr($i) . ' (' . $i . ')';
 
+$cache = false;
 $oK->set('/Template/variable' , $block);
 $oK->call('/Template/display', '003_included_blocks_core.html', !$cache ? microtime(true) : null);
 
