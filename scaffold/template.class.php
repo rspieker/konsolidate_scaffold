@@ -28,8 +28,6 @@ class ScaffoldTemplate extends Konsolidate
 	protected $_hook;
 	protected $_filters;
 
-	public $_featureExists;
-
 	/**
 	 *  Constructor
 	 *  @name   __construct
@@ -49,7 +47,6 @@ class ScaffoldTemplate extends Konsolidate
 		$this->_namespace      = $this->_getNamespace();
 		$this->_feature        = Array();
 		$this->_child          = Array();
-		$this->_featureExists  = Array();
 
 		$filters = $this->get('/Config/Template/filters', 'comment, whitespace');
 		//  if filters are set (read: not explicitly turned off) and this template instance has no parent template, hook the filters to the PHASE_RENDER phase
@@ -58,9 +55,6 @@ class ScaffoldTemplate extends Konsolidate
 			$this->_filters = preg_split('/\s*,\s*/', $filters);
 			$this->addHook(self::PHASE_RENDER, Array($this, '_applyFilters'));
 		}
-
-		if ($parentTemplate)
-			$this->_featureExists = &$parentTemplate->_featureExists;
 
 		if (!empty($source))
 			$this->load($source, $parentTemplate, $prepare);
@@ -459,10 +453,7 @@ class ScaffoldTemplate extends Konsolidate
 
 		if (!$this->_featureIsProcessed($node))
 		{
-			if (!isset($this->_featureExists[$localName]))
-				$this->_featureExists[$localName] = $this->checkModuleAvailability('Feature/' . $localName);
-
-			$type     = $this->_featureExists[$node->localName] ? 'Feature/' . $localName : 'Feature';
+			$type     = $this->checkModuleAvailability('Feature/' . $localName) ? 'Feature/' . $localName : 'Feature';
 			$instance = $this->instance($type, $node, $this);
 			$instance->prepare();
 			$this->_feature[$node->localName][] = $instance;
@@ -639,6 +630,19 @@ class ScaffoldTemplate extends Konsolidate
 	/**
 	 *  Apply the configured filters
 	 *  @name   _applyFilters
+	 *  @type   method
+	 *  @access protected
+	 *  @param  stdClass hook
+	 *  @return void
+	 */
+	protected function _applyFilters($hook)
+	{
+		if (!$this->_template)
+			foreach ($this->_filters as $method)
+				$hook->template->call('Filter/' . $method, $hook->dom);
+	}
+}
+pplyFilters
 	 *  @type   method
 	 *  @access protected
 	 *  @param  stdClass hook
