@@ -29,8 +29,9 @@ class ScaffoldTemplateFeatureBlock extends ScaffoldTemplateFeature
 		);
 
 		$data = '';
+		$dom  = $this->_getDOMDocument();
 		foreach ($this->_node->childNodes as $child)
-			$data .= trim($this->_getDOMDocument()->saveXML($child));
+			$data .= trim($dom->saveXML($child));
 		$this->_data = $data;
 
 		$this->_node->parentNode->removeChild($this->_node);
@@ -45,11 +46,8 @@ class ScaffoldTemplateFeatureBlock extends ScaffoldTemplateFeature
 	 */
 	public function duplicate()
 	{
-		$instance = $this->instance('/Template', $this->_data, $this->_template);
-
-		//  during the first duplicate we need to construct the template from an XML string, we can cache the DOMDocument and clone this cached DOM for further instances
-		$this->_data = clone (is_string($this->_data) ? $instance->getDOM() : $this->_data);
-
+		$instance = $this->instance('/Template');
+		$instance->load($this->_data, $this->_template);
 		return $this->_addToStack($instance);
 	}
 
