@@ -18,7 +18,7 @@ foreach ($files as $file)
 
 	//  start the test
 	$real = Array();
-	for ($test = 0; $test < 25; ++$test)
+	for ($test = 0; $test < 50; ++$test)
 	{
 		$cache = false;
 		ob_start();
