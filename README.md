@@ -2,13 +2,15 @@
 
 Scaffolding tier for Konsolidate (https://github.com/konfirm/konsolidate)
 
-> Please note that the XML based template that comes with the Scaffold-tier is significantly slower than the default Template engine shipped with Konsolidate.
-This is maily due to the use of DOM documents combined with the more powerful options in the Scaffold-tier.
+>Please not that the XML based templating that comes with the Scaffold-tier is slower than the default template engine that ships with Konsolidate.
+>This is mainly due to the use of DOM documents combined with the more powerful options in the Scaffold template engine.
+>A lot of lost performance has already been addressed in a recent update to Konsolidate itself, bringing down the overhead from using blocks from 35 times slower to 'just' 5 times slower (CoreTemplate: 0.0022 seconds vs ScaffoldTemplate: 0.0111 seconds creating 26 blocks).
 
-> Especially when benchmarking the repeating 'block' is (in comparison) painstakingly slow (Scaffold template is roughly 35 times slower (60 times when using the cache in the old template engine).
+>The real world benchmark (which isn't all that real world, but it mixes common template functionality) is down from 4.7 times slower to 'just' 1.8 times slower. In seconds this boils down to CoreTemplate: 0.0078 seconds vs ScaffoldTemplate: 0.0147 seconds.
 
-> In a more real world usage test the results are way better but still Scaffold template is ~5 times slower.
-> We do believe however that the Scaffold template uses much cleaner templates and will be able to improve the development flow, and we are actually talking about milliseconds here (ScaffoldTemplate 0.0417 seconds vs CoreTemplate 0.0089 seconds, which is 4.7 times slower). While I will continue to optimize the performance, I strongly believe that ScaffoldTemplate already has several benefits; e.g. security (mostly output escaping), automatic resolvement of external requirements (only the requirements actually used are in the output) and your front-enders don't need to learn PHP basics.
+>I do believe that the Scaffold template uses much cleaner templates and will be able to improve the development flow, and we are actually talking about milliseconds here.
+
+>While I will continue to optimize the performance I do consider the overhead to be acceptable, as the benefits of ScaffoldTemplate exceed those of CoreTemplate; e.g. security (implicit output escaping), automatic resolvement of external requirements (only the requirements actually used are in the output) and your front-enders don't need to learn PHP basics.
 > Last but most certainly not least, the hooks that allow you to do advanced pre-/postprocessing directly on the DOM allow for way more flexibility than CoreTemplate (even though similar functionality could be achieved with CoreTemplate  using output buffering).
 
 
