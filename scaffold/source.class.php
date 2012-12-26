@@ -68,20 +68,23 @@ class ScaffoldSource extends Konsolidate
 	{
 		if (count($fileList) > 0)
 		{
+			$cacheFile = '';
 			$alphabet = array_map('chr', array_merge(
 				range(48, 57),  //  numbers
 				range(97, 122), //  lower case characters
 				range(65, 90)   //  upper case characters
 			));
-			$checksum  = explode(PHP_EOL, wordwrap(md5(json_encode($fileList)), 2, PHP_EOL, true));
-			$cacheFile = '';
+			//  a lot is going on on this line; first we take the md5 checksums of the files in the list, then this goes into a json blob, which is m5'd on its own and then wordwrapped at every 2nd character and lastly, the result gets exploded on the wordwrap added newlines. Leaving us with a 16 item array.
+			$checksum  = explode(PHP_EOL, wordwrap(md5(json_encode(array_map('md5_file', $fileList))), 2, PHP_EOL, true));
 			while (count($checksum))
 				$cacheFile .= $alphabet[hexdec(array_shift($checksum)) % count($alphabet)];
 			$cacheFile = $this->_cachePath . '/' . $cacheFile . '.' . pathinfo($fileList[0], PATHINFO_EXTENSION);
 
-			if (realpath($cacheFile))
+			//  if the cache file exists, we gently push the modification time to now (this should make removing old obselete files easier to find)
+			if (realpath($cacheFile) && touch($cacheFile))
 				return basename($cacheFile);
 
+			//  as no cache file was found (or we couldn't push the modification time), we need to generate it
 			$fp = fopen($cacheFile, 'w+');
 			if ($fp)
 			{
