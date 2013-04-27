@@ -27,6 +27,7 @@ class ScaffoldTemplate extends Konsolidate
 	protected $_child;
 	protected $_hook;
 	protected $_filters;
+	protected $_templatePath;
 
 	/**
 	 *  Constructor
@@ -56,6 +57,21 @@ class ScaffoldTemplate extends Konsolidate
 			$this->addHook(self::PHASE_RENDER, Array($this, '_applyFilters'));
 		}
 
+		//  configure template paths
+		if ($parentTemplate)
+		{
+			$this->_templatePath = $parentTemplate->getPathList();
+		}
+		else
+		{
+			$this->_templatePath = Array();
+			$path = realpath($this->get('/Config/Template/path'));
+			if ($path && !in_array($path, $this->_templatePath))
+				$this->_templatePath[] = $path;
+			if (defined('DOCUMENT_ROOT') && realpath(DOCUMENT_ROOT) && !in_array(DOCUMENT_ROOT, $this->_templatePath))
+				$this->_templatePath[] = DOCUMENT_ROOT;
+		}
+
 		if (!empty($source))
 			$this->load($source, $parentTemplate, $prepare);
 	}
@@ -79,11 +95,13 @@ class ScaffoldTemplate extends Konsolidate
 		if ($source instanceof DOMDocument)
 		{
 			$data = $source;
+			$this->origin = '(DOMDocument) ' . substr($source->saveXML(), 0, 150);
 		}
 		else if ($source instanceof DOMElement)
 		{
 			$data = new DOMDocument();
 			$data->appendChild($data->importNode($source, true));
+			$this->origin = '(DOMElement) ' . substr($source->ownerDocument->saveXML($source), 0, 150);
 		}
 		else if (is_string($source))
 		{
@@ -91,6 +109,7 @@ class ScaffoldTemplate extends Konsolidate
 			$file   = $this->_getFileName($source);
 			$source = $this->_wrapSource($file ? file_get_contents($file) : $source);
 			$data->loadXML($source);
+			$this->origin = $file ? '(file) ' . $file : '(string) ' . substr($source, 0, 150);
 		}
 		else
 		{
@@ -114,6 +133,18 @@ class ScaffoldTemplate extends Konsolidate
 
 		$this->_enterPhase(self::PHASE_READY);
 		return $this;
+	}
+
+	/**
+	 *  Obtain the list of paths where templates are (configured to be) found
+	 *  @name   getPathList
+	 *  @type   method
+	 *  @access public
+	 *  @return array path
+	 */
+	public function getPathList()
+	{
+		return $this->_templatePath;
 	}
 
 	/**
@@ -386,7 +417,10 @@ class ScaffoldTemplate extends Konsolidate
 
 		//  remove any custom namespace we have inserted during template load
 		foreach ($this->_namespace as $local=>$uri)
-			$this->_content->documentElement->removeAttributeNS($uri, $local);
+		{
+			if ($this->_content->documentElement)
+				$this->_content->documentElement->removeAttributeNS($uri, $local);
+		}
 	}
 
 	/**
@@ -404,7 +438,7 @@ class ScaffoldTemplate extends Konsolidate
 
 		if (!is_string($value) && !is_numeric($value))
 		{
-			if ($value instanceof self)
+			if ($value instanceof ScaffoldTemplate)
 			{
 				$value = $value->render(true, true);
 			}
@@ -473,7 +507,7 @@ class ScaffoldTemplate extends Konsolidate
 			$this->_feature[$node->localName][] = $instance;
 
 			if (substr(get_class($instance), -15) == 'TemplateFeature')
-				$this->call('/Log/message', 'Feature not found: "' . $node->localName . '", using the default feature class "' . get_class($instance) . '" instead.', 2);
+				$this->call('/Log/message', 'Feature not found: "' . $node->localName . '", using the default feature class "' . get_class($instance) . '" instead.', 4);
 		}
 	}
 
@@ -605,11 +639,24 @@ class ScaffoldTemplate extends Konsolidate
 		if (preg_match('/^[a-zA-Z0-9_\.\/-]+\.[a-zA-Z]+ml$/', $source))
 		{
 			if (realpath($source))
+			{
 				$return = realpath($source);
-			else if (realpath($this->get('/Config/Template/path') . '/' . $source))
-				$return = realpath($this->get('/Config/Template/path') . '/' . $source);
-			else if (defined('DOCUMENT_ROOT') && realpath(DOCUMENT_ROOT . '/' . $source))
-				$return = realpath(DOCUMENT_ROOT . '/' . $source);
+				$dir    = dirname($return);
+				if (!in_array($dir, $this->_templatePath))
+					array_unshift($this->_templatePath, dirname($return));
+			}
+			else
+			{
+				foreach ($this->_templatePath as $path)
+				{
+					$file = realpath($path . '/' . $source);
+					if ($file)
+					{
+						$return = $file;
+						break;
+					}
+				}
+			}
 		}
 		return $return;
 	}
@@ -653,6 +700,6 @@ class ScaffoldTemplate extends Konsolidate
 	{
 		if (!$this->_template)
 			foreach ($this->_filters as $method)
-				$hook->template->call('Filter/' . $method, $hook->dom);
+				$hook->template->call('Filter/' . $method, $hook);
 	}
 }
