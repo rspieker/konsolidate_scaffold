@@ -58,6 +58,8 @@ class ScaffoldTemplateFeature extends Konsolidate
 	 */
 	public function render()
 	{
+		if (get_class($this) === __CLASS__)
+			$this->_renderDummy();
 		$this->_clean();
 		return true;
 	}
@@ -176,5 +178,55 @@ class ScaffoldTemplateFeature extends Konsolidate
 			);
 			$this->_node->parentNode->removeChild($this->_node);
 		}
+	}
+
+	/**
+	 *
+	 */
+	protected function _renderDummy()
+	{
+		$dom  = $this->_getDOMDocument();
+		$name = $this->_node->localName;
+		$info = $this->_node->parentNode->insertBefore(
+			$dom->createElement('div'),
+			$this->_node
+		);
+		$info->setAttribute('style', 'border: 1px solid #900; background-color: #fd9; color: #900; margin: 20px; border-radius: 10px;');
+		$info->appendChild($dom->createElement('h2', 'Unknown template feature: ' . $name));
+
+		//  describe from where the feature request originated
+		$origin = $info->appendChild($dom->createElement('div'));
+		$origin->appendChild($dom->createElement('h4', 'Origin'));
+		$origin->appendChild($dom->createElement('p', 'The template where the feature was called from is:'));
+		$origin->appendChild($dom->createElement('code', $this->_template->origin));
+		$origin->appendChild($dom->createElement('p', 'The exact feature syntax is:'));
+		$origin->appendChild($dom->createElement('code', $dom->saveXML($this->_node)));
+
+		//  describe where we've looked for the corresponding file
+		$search = $info->appendChild($dom->createElement('div'));
+		$search->appendChild($dom->createElement('h4', 'Paths'));
+		$search->appendChild($dom->createElement('p', 'The feature was not found in the project libraries, expected one of:'));
+		$list = $search->appendChild($dom->createElement('ul'));
+		foreach ($this->getFilePath() as $tier=>$path)
+		{
+			$item = $list->appendChild($dom->createElement('li'));
+			$item->appendChild($dom->createTextNode('class '));
+			$item->appendChild($dom->createElement('strong', $tier . ucFirst($name)));
+			$item->appendChild($dom->createTextNode(' in ' . $path . '/' . $name . '.class.php'));
+		}
+
+		$create = $info->appendChild($dom->createElement('div'));
+		$create->appendChild($dom->createElement('h4', 'Where to go from here'));
+		$create->appendChild($dom->createElement('p', 'Assuming the syntax of the feature is correct, you now need to create a feature implementation class, this should be (one of):'));
+		$list = $create->appendChild($dom->createElement('ul'));
+		foreach ($this->getFilePath() as $tier=>$path)
+		{
+			if (strpos($tier, 'Scaffold') === 0)
+				break;
+			$item = $list->appendChild($dom->createElement('li'));
+			$item->appendChild($dom->createElement('code', 'class ' . $tier . ucFirst($name) . ' extends ' . __CLASS__));
+			$item->appendChild($dom->createTextNode(' in ' . $path . '/' . $name . '.class.php'));
+		}
+
 	}
 }

@@ -18,8 +18,7 @@ class ScaffoldTemplateFeatureInclude extends ScaffoldTemplateFeature
 	 */
 	public function prepare()
 	{
-		$template = $this->instance('/Template');
-		$template->load($this->file, null, false);
+		$template = $this->instance('/Template', $this->file, $this->_template, false);
 		$dom = $template->getDOM();
 
 		foreach ($dom->documentElement->childNodes as $child)
