@@ -118,3 +118,20 @@ function comment($hook)
 $template->addHook(ScaffoldTemplate::PHASE_RENDER, 'comment');
 
 ```
+
+##Using the CSP (Content Security Policy) feature
+Like any other feature, you can add the CSP feature using the feature syntax ```<k:csp />```, however the CSP headers generated would block nearly all content for the page. A basic understanding of CSP is required, as misconfiguration is probably worse than none at all. A good starting point would be http://www.html5rocks.com/en/tutorials/security/content-security-policy/, as it explains the basic mechanics.
+The base configuration of the CSP feature is done using attributes on the ```<k:csp />``` node, using a slightly shortened syntax.
+For example: ```<k:csp default="self" />``` will allow any additional resource to originate from the same (sub-)domain as the page itself. After the initial configuration the CSP-feature will add any URL for javascripts and stylesheets added using the ```<k:require file="..." />``` feature, this will leave out any inline script/style so if you cannot move the script/style into an external file, you will need the 'unsafe-inline' option added to the default-src, script-src and/or style-src.
+Current available attributes are:
+- ```default``` - default-src, the default policy
+- ```script``` - script-src, the script policy (extended using the javascript file required with ```<k:require file="..." />```)
+- ```style``` - style-src, the stylesheet policy (extended using the javascript file required with ```<k:require file="..." />```)
+- ```img``` - img-src, the image policy
+- ```media``` - media-src, the media (video and audio) policy
+- ```frame``` - frame-src, the frame policy
+- ```font``` - font-src, the font policy
+- ```connect``` - connect-src, the connect policy (where can XMLHTTPRequest, Websockets, etc connect to)
+- ```report``` - report-uri, where to send the report (note that FireFox won't send the report cross-domain, so it needs to comply with the 'self' rule)
+
+As the CSP specification have been a working draft for quite some time, there are three types of headers available, the CSP-feature looks at the user-agent to decide which one to use (Content-Security-Policy, X-Content-Security-Policy or X-Webkit-CSP) and adapts the contents of the policy to reflect the supported state.
