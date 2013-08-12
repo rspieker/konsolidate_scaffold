@@ -26,7 +26,7 @@ class ScaffoldSourceScript extends Konsolidate
 			'/\/\*(.*)\*\//msU'                                                         => '',       //  block comments
 			'/\/\/.*/'                                                                  => '',       //  single line comments
 			'/^\s*/sm'                                                                  => '',       //  leading whitespace
-			'/\s*([=\-\+&\|,\?:<>\*%!;\/]+)\s*/sm'                                      => '\1',     //  operator whitespace
+			'/\s*([=\-\+&\|,\?:<>\*%!;\/\.]+)\s*/sm'                                    => '\1',     //  operator whitespace
 			'/\s+([\{\}\[\]\(\)]+)/'                                                    => '\1',     //  whitespace before brackets and braces
 			'/([\{\[\(\)]+)\s+/'                                                        => '\1',     //  whitespace after opening brackets and opening/closing braces
 			'/;([\}]+)/'                                                                => '\1',     //  removing semi-colons before closing brackets
