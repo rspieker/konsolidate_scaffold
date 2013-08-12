@@ -124,7 +124,7 @@ Like any other feature, you can add the CSP feature using the feature syntax ```
 The base configuration of the CSP feature is done using attributes on the ```<k:csp />``` node, using a slightly shortened syntax.
 For example: ```<k:csp default="self" />``` will allow any additional resource to originate from the same (sub-)domain as the page itself. After the initial configuration the CSP-feature will add any URL for javascripts and stylesheets added using the ```<k:require file="..." />``` feature, this will leave out any inline script/style so if you cannot move the script/style into an external file, you will need the 'unsafe-inline' option added to the default-src, script-src and/or style-src.
 Current available attributes are:
-- ```default``` - default-src, the default policy
+- ```default``` - default-src, the default policy (defaults to 'none' if omitted, blocking everything by default)
 - ```script``` - script-src, the script policy (extended using the javascript file required with ```<k:require file="..." />```)
 - ```style``` - style-src, the stylesheet policy (extended using the javascript file required with ```<k:require file="..." />```)
 - ```img``` - img-src, the image policy
