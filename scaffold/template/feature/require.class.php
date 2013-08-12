@@ -20,21 +20,34 @@ class ScaffoldTemplateFeatureRequire extends ScaffoldTemplateFeature
 	{
 		if ($this->attribute('file') && !$this->attribute('type'))
 		{
-			$type = null;
-
-			switch (pathinfo($this->attribute('file'), PATHINFO_EXTENSION))
-			{
-				case 'js':
-					$type = 'text/javascript';
-					break;
-
-				case 'css':
-					$type = 'text/css';
-					break;
-			}
-
+			$type = $this->_getMIMEType(pathinfo($this->attribute('file'), PATHINFO_EXTENSION));
 			if (!empty($type))
 				$this->attribute('type', $type);
 		}
+	}
+
+	/**
+	 *  Determine the MIME type by the file's extension
+	 *  @name   _getMIMEType
+	 *  @type   method
+	 *  @access protected
+	 *  @param  string file extension
+	 *  @return string MIME type (null if not found)
+	 */
+	protected function _getMIMEType($extension)
+	{
+		$type = null;
+		switch ($extension)
+		{
+			case 'js':
+				$type = 'text/javascript';
+				break;
+
+			case 'css':
+				$type = 'text/css';
+				break;
+		}
+
+		return $type;
 	}
 }

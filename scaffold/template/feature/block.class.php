@@ -3,7 +3,7 @@
 
 /**
  *  Block Template Feature, handles the <k:block /> feature which allow for repeating blocks of (x)html
- *  @name    ScaffoldSourceBlock
+ *  @name    ScaffoldTemplateFeatureBlock
  *  @package Scaffold
  *  @author  Rogier Spieker <rogier@konfirm.net>
  */
