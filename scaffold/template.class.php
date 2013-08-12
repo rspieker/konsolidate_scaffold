@@ -29,6 +29,7 @@ class ScaffoldTemplate extends Konsolidate
 	protected $_filters;
 	protected $_templatePath;
 
+
 	/**
 	 *  Constructor
 	 *  @name   __construct
@@ -44,7 +45,7 @@ class ScaffoldTemplate extends Konsolidate
 	{
 		parent::__construct($parent);
 
-		$this->_entityResolver = $this->get('/Config/template/entityresolver', 'Entity/utf8');
+		$this->_entityResolver = $this->get('/Config/Template/entityresolver', 'Entity/utf8');
 		$this->_namespace      = $this->_getNamespace();
 		$this->_feature        = Array();
 		$this->_child          = Array();
@@ -281,22 +282,20 @@ class ScaffoldTemplate extends Konsolidate
 		//  create a reference to the inner DOMDocument
 		$dom = $this->_content;
 
-		//  restore the natural balance of the DOMDocument, as we (may) have wrecked havoc by splitting textnodes and manipulating removing feature nodes
+		//  restore the natural balance of the DOMDocument, as we (may) have wrecked havoc by splitting textnodes and manipulating feature nodes
 		$dom->normalizeDocument();
 		$this->_enterPhase(self::PHASE_RENDER);
 
-		//  This works arounds PHP bug #40359 (https://bugs.php.net/bug.php?id=40359) where the saveHTML method will actually meddle with the whitespace in the output, so we create the HTML output ourselves
+		//  This works arounds PHP not-a-bug #40359 (https://bugs.php.net/bug.php?id=40359) where the saveHTML method will actually meddle with the whitespace in the output, so we create the HTML output ourselves
 		if (LIBXML_VERSION > 20632)
 		{
-			$selfClosing = Array('base', 'basefont', 'frame', 'link', 'meta', 'area', 'br', 'col', 'hr', 'img', 'input', 'param');
-			//  find all nodes which do not contain any comment, text, CDATA or element node
-			foreach ($this->_xpath->query('//*[not(node())]') as $node)
-				if (!in_array(strToLower($node->nodeName), $selfClosing))
-					$node->appendChild($this->_content->createTextNode(''));
+			//  find all nodes which are not self-closing AND do not contain any comment, text, CDATA or element node
+			foreach ($this->_xpath->query('//*[not(name()="base" or name()="basefont" or name()="frame" or name()="link" or name()="meta" or name()="area" or name()="br" or name()="col" or name()="hr" or name()="img" or name()="input" or name()="param") and not(node())]') as $node)
+				$node->appendChild($this->_content->createTextNode(''));
 
-			return $asDOM ? $dom : $dom->saveXML($dom->doctype) . PHP_EOL . PHP_EOL . $dom->saveXML($dom->documentElement);
+			return $asDOM ? $dom : $dom->saveXML($dom->doctype) . PHP_EOL . $dom->saveXML($dom->documentElement);
 		}
-		return $asDOM ? $dom : $dom->saveHTML();
+		return $asDOM ? $dom : trim($dom->saveHTML());
 	}
 
 	/**
@@ -417,10 +416,8 @@ class ScaffoldTemplate extends Konsolidate
 
 		//  remove any custom namespace we have inserted during template load
 		foreach ($this->_namespace as $local=>$uri)
-		{
 			if ($this->_content->documentElement)
 				$this->_content->documentElement->removeAttributeNS($uri, $local);
-		}
 	}
 
 	/**
@@ -439,26 +436,16 @@ class ScaffoldTemplate extends Konsolidate
 		if (!is_string($value) && !is_numeric($value))
 		{
 			if ($value instanceof ScaffoldTemplate)
-			{
 				$value = $value->render(true, true);
-			}
 
 			if ($value instanceof DOMText)
-			{
 				$value = $value->nodeValue;
-			}
 			else if ($value instanceof DOMElement)
-			{
 				$value = $value;
-			}
 			else if ($value instanceof DOMDocument)
-			{
 				$value = $value->documentElement;
-			}
 			else
-			{
 				$this->call('/Log/message', 'Cannot handle ' . (is_object($value) ? get_class($value) : gettype($value)) . ' placeholder values', 2);
-			}
 		}
 		return $value;
 	}
@@ -671,6 +658,9 @@ class ScaffoldTemplate extends Konsolidate
 	protected function _getNamespace()
 	{
 		$namespace = Array('k' => '/');
+		$tierList  = $this->getRoot()->getFilePath();
+		foreach ($tierList as $tier=>$path)
+			$namespace[strToLower($tier)] = $path;
 
 		return $namespace;
 	}
