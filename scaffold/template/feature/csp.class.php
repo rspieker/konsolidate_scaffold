@@ -133,7 +133,7 @@ class ScaffoldTemplateFeatureCSP extends ScaffoldTemplateFeature
 				return $url['scheme'];
 
 			//  domains
-			else if (preg_match('/^(\*\.)?[a-z]\w+\.[a-z]{2,6}$/', $url['path']))
+			else if (preg_match('/^(\*\.)?[a-z][a-z0-9_\-\.]+\.[a-z]{2,6}$/', $url['path']))
 				return $url['path'];
 
 			//  protocol-less domain and plain host names
