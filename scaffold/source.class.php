@@ -40,15 +40,18 @@ class ScaffoldSource extends Konsolidate
 	 */
 	public function minify($file)
 	{
-		$file   = $this->_locatePath($file);
+		$file = $this->_locatePath($file);
+		$ext  = pathinfo($file, PATHINFO_EXTENSION);
+
+		//  if the filename contains 'min.', we assume it is already minified
+		if (strstr($file, 'min.' . $ext))
+			return $file;
+
+		//  obtain a helper object for the given file
 		$helper = $this->_getHelper($file);
 
 		if ($file && $helper && method_exists($helper, 'minify'))
 		{
-			$ext = pathinfo($file, PATHINFO_EXTENSION);
-			if (strstr($file, 'min.' . $ext))
-				return $file;
-
 			$cacheFile = $this->_cachePath . '/' . substr(basename($file), 0, -strlen($ext)) . 'min.' . $ext;
 			if ((realpath($cacheFile) && filemtime($file) < filemtime($cacheFile)) || file_put_contents($cacheFile, $helper->minify(file_get_contents($file))))
 				return $cacheFile;
