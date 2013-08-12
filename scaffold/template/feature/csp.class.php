@@ -144,6 +144,10 @@ class ScaffoldTemplateFeatureCSP extends ScaffoldTemplateFeature
 					return $url['host'];
 			}
 		}
+		else if (isset($url['host']))
+		{
+			return $url['host'];
+		}
 		return 'self';
 	}
 
