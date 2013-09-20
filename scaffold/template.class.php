@@ -120,7 +120,8 @@ class ScaffoldTemplate extends Konsolidate
 		if ($data instanceof DOMDocument)
 		{
 			foreach ($this->_namespace as $namespace=>$path)
-				$data->createAttributeNS($path, $namespace . ':' . get_class($this));
+				if (!empty($path))
+					$data->createAttributeNS($path, $namespace . ':' . get_class($this));
 
 			$this->_content = $data;
 			$this->_xpath   = new DOMXPath($this->_content);
@@ -571,7 +572,8 @@ class ScaffoldTemplate extends Konsolidate
 		$ns      = Array();
 
 		foreach ($this->_namespace as $namespace=>$path)
-			$ns[] = 'xmlns:' . $namespace . '="' . $path . '"';
+			if (!empty($path))
+				$ns[] = 'xmlns:' . $namespace . '="' . $path . '"';
 
 		if ($this->_entityResolver && preg_match_all('/&([a-zA-Z]+);/U', $source, $match))
 			for ($i = 0; $i < count($match[1]); ++$i)
