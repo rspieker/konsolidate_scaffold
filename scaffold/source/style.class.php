@@ -28,8 +28,7 @@ class ScaffoldSourceStyle extends Konsolidate
 			'/([:,;\(])\s*/'                             => '\1',    //  excess whitespace in declarations
 			'/\s*([\{])\s*/'                             => '\1',    //  excess whitespace in selectors
 			'/\s*([\(|\),])\s*(?=\W)/'                   => '\1',    //  excess whitespace around braces and comma's
-			'/(?<=url)\(([\'"]?)([^ ]*?)\\1\)/'          => '(\2)',  //  quotes from url's
-			'/(?<!url\()([\'"]?.*?)(?:[a-z]+[0-9]?)(#)/' => '\1\2',  //  remove the element from ID selectors
+			'/(?<=url)\(\s*([\'"]?)([^ ]*?)\\1\s*\)/'    => '(\2)',  //  quotes from url's
 			'/;\}/'                                      => '}',     //  omit the semi-colon from the last property
 			'/[a-z0-9\s_\-\.#]+\{\s*\}/i'                => '',      //  remove empty declarations
 			'/\b0\.([0-9]+)/'                            => '.\1',   //  decimals between 0 and 1 don't require the leading 0
